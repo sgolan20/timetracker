@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Plus, Timer, Trash2, Edit2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Play, Pause, Plus, Timer, Trash2, Edit2, ArrowRight, ArrowLeft, Maximize2, Minimize2 } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -17,8 +17,10 @@ function App() {
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDuration, setNewProjectDuration] = useState('');
   const [editingProject, setEditingProject] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
+  const fullscreenRef = useRef<HTMLDivElement>(null);
 
   const generateRandomColor = () => {
     const hue = Math.floor(Math.random() * 360);
@@ -88,6 +90,9 @@ function App() {
     setIsPaused(false);
     setCurrentProject(-1);
     setBackgroundColor('#ffffff');
+    if (isFullscreen) {
+      toggleFullscreen();
+    }
   };
 
   const playAlarm = () => {
@@ -96,6 +101,27 @@ function App() {
       audioRef.current.play();
     }
   };
+
+  const toggleFullscreen = () => {
+    if (!fullscreenRef.current) return;
+
+    if (!document.fullscreenElement) {
+      fullscreenRef.current.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   useEffect(() => {
     let timer: number;
@@ -115,6 +141,9 @@ function App() {
         setIsRunning(false);
         setCurrentProject(-1);
         setBackgroundColor('#ffffff');
+        if (isFullscreen) {
+          toggleFullscreen();
+        }
       }
     }
 
@@ -126,6 +155,7 @@ function App() {
       dir="rtl"
       className="min-h-screen w-full transition-colors duration-500 ease-in-out"
       style={{ backgroundColor }}
+      ref={fullscreenRef}
     >
       {!isRunning ? (
         <div className="container mx-auto p-8">
@@ -254,6 +284,12 @@ function App() {
       ) : (
         <div className="min-h-screen flex items-center justify-center relative">
           <div className="absolute top-4 right-4 flex gap-2">
+            <button
+              onClick={toggleFullscreen}
+              className="bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all transform hover:scale-105"
+            >
+              {isFullscreen ? <Minimize2 className="w-6 h-6" /> : <Maximize2 className="w-6 h-6" />}
+            </button>
             <button
               onClick={togglePause}
               className="bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all transform hover:scale-105"
