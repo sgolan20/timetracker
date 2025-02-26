@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Plus, Timer, Trash2, Edit2, ArrowRight, ArrowLeft, Maximize2, Minimize2 } from 'lucide-react';
 
 interface Project {
